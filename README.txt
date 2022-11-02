@@ -6,3 +6,5 @@ You can Read config(-s) by get query:
     /config?service=*** - return config by service value
 You can Update config
 You can Delete config
+
+All warnings and errors are logging in /tmp/GoCloudTest
