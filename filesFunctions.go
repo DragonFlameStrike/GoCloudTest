@@ -8,9 +8,6 @@ import (
 )
 
 func chooseNewestFile(files []string) string {
-	if len(files) == 0 {
-		return ""
-	}
 	maxV := "0.0"
 	maxVId := -1
 	for i, file := range files {
@@ -56,7 +53,7 @@ func findFiles(serviceName string) []string {
 		}
 		f.Close()
 		value := extractValue(string(byteValue[:]), "service")
-		if value[1:] == serviceName { //value[1:] because first symbol everytime is SPACE
+		if value[1:] == serviceName || serviceName == "" { //value[1:] because first symbol everytime is SPACE
 			correctFiles = append(correctFiles, file.Name())
 		}
 	}

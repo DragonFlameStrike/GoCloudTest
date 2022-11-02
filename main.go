@@ -29,7 +29,7 @@ func main() {
 	sigCather()
 
 	//Create http server
-	http.HandleFunc("/config", configHandler)
+	http.HandleFunc("/config", configReadCreate)
 	iLog.Print("Server is ready")
 	http.ListenAndServe(":8080", nil)
 	if err != nil {
