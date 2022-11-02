@@ -31,7 +31,7 @@ func configHandler(w http.ResponseWriter, r *http.Request) {
 			http.ServeFile(w, r, "./configs/"+file)
 		}
 	case "POST":
-		iLog.Println(w, "Post from website!\n")
+		iLog.Println("catch POST request...")
 	default:
 		iLog.Println(w, "Only GET and POST methods are supported.")
 	}
