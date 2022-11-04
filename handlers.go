@@ -24,7 +24,9 @@ func configReadCreate(w http.ResponseWriter, r *http.Request) {
 		err := ReceiveFile(w, r)
 		if err != nil {
 			iLog.Print(err)
-			http.Error(w, "404 not found.", http.StatusNotFound)
+			http.Error(w, "400 bad request.", http.StatusBadRequest)
+		} else {
+			iLog.Println("SUCCESS : file is created!")
 		}
 	default:
 		iLog.Println(w, "Only GET and POST methods are supported.")
