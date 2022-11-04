@@ -22,12 +22,12 @@ func configReadCreate(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "404 not found.", http.StatusNotFound)
 			return
 		}
-		if s == "" {
+		if s == "" { //Print all configs
 			for i, file := range files {
 				fmt.Fprintf(w, "%d. %s\n", i+1, file)
 			}
 			iLog.Printf("SUCCESS : configs is sent")
-		} else {
+		} else { //Print config by service name
 			file := chooseNewestFile(files)
 			iLog.Printf("SUCCESS : config is found - ", file)
 			http.ServeFile(w, r, "./configs/"+file)
@@ -35,6 +35,7 @@ func configReadCreate(w http.ResponseWriter, r *http.Request) {
 
 	case "POST":
 		iLog.Println("catch POST request...")
+		ReceiveFile(w, r)
 	default:
 		iLog.Println(w, "Only GET and POST methods are supported.")
 	}
