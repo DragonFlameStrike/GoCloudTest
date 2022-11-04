@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,38 +11,35 @@ import (
 	"strings"
 )
 
-func ReceiveFile(w http.ResponseWriter, r *http.Request) {
-	r.ParseMultipartForm(32 << 20) // limit your max input length!
+func ReceiveFile(w http.ResponseWriter, r *http.Request) error {
+	err := r.ParseMultipartForm(32 << 20) // limit your max input length!
+	if err != nil {
+		return err
+	}
 	file, header, err := r.FormFile("file")
 	if err != nil {
-		iLog.Fatal(err)
-		return
+		return err
 	}
 	defer file.Close()
 	iLog.Printf("Get file - %s\n", header.Filename)
-	// Copy the file data to my buffer
 	name := strings.Split(header.Filename, ".")
 	newFile, err := os.Create("./configs/" + name[0] + "_v1.0." + name[1])
 	if err != nil {
-		iLog.Println("Can't create new file")
-		return
+		return err
 	}
 	defer newFile.Close()
 	_, err = io.Copy(newFile, file)
 	if err != nil {
-		iLog.Println("Can't copy in new file")
-		return
+		return err
 	}
-	return
+	return nil
 }
 
-func RequestFile(w http.ResponseWriter, r *http.Request) {
+func RequestFile(w http.ResponseWriter, r *http.Request) error {
 	s := r.URL.Query().Get("service")
 	files := findFiles(s)
 	if len(files) == 0 {
-		iLog.Printf("NOT SUCCESS : config is not found")
-		http.Error(w, "404 not found.", http.StatusNotFound)
-		return
+		return errors.New("NOT SUCCESS : config is not found")
 	}
 	if s == "" { //Print all configs
 		for i, file := range files {
@@ -53,6 +51,7 @@ func RequestFile(w http.ResponseWriter, r *http.Request) {
 		iLog.Printf("SUCCESS : config is found - ", file)
 		http.ServeFile(w, r, "./configs/"+file)
 	}
+	return nil
 }
 
 func chooseNewestFile(files []string) string {
