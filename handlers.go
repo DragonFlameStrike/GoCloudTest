@@ -18,6 +18,8 @@ func configReadCreate(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			iLog.Print(err)
 			http.Error(w, "404 not found.", http.StatusNotFound)
+		} else {
+			iLog.Println("SUCCESS : file(-s) is sent")
 		}
 	case "POST":
 		iLog.Println("catch CREATE request...")

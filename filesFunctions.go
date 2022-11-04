@@ -55,10 +55,9 @@ func RequestFile(w http.ResponseWriter, r *http.Request) error {
 		for i, file := range files {
 			fmt.Fprintf(w, "%d. %s\n", i+1, file)
 		}
-		iLog.Printf("SUCCESS : configs is sent")
 	} else { //Print config by service name
 		file := chooseNewestFile(files)
-		iLog.Printf("SUCCESS : config is found - ", file)
+		iLog.Printf("Config is found - ", file)
 		http.ServeFile(w, r, "./configs/"+file)
 	}
 	return nil
