@@ -8,27 +8,36 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 func ReceiveFile(w http.ResponseWriter, r *http.Request) error {
+	//Parse received file
 	err := r.ParseMultipartForm(32 << 20) // limit your max input length!
 	if err != nil {
 		return err
 	}
-	file, header, err := r.FormFile("file")
+	rfile, header, err := r.FormFile("file")
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer rfile.Close()
 	iLog.Printf("Get file - %s\n", header.Filename)
 	name := strings.Split(header.Filename, ".")
-	newFile, err := os.Create("./configs/" + name[0] + "_v1.0." + name[1])
+
+	//Choose correct version
+	files := findFilesByName(name[0])
+	nfile := chooseNewestFile(files)
+	v := getVersion(nfile)
+
+	//Create file on server
+	newFile, err := os.Create("./configs/" + name[0] + "_v" + getNextCreateVersion(v) + "." + name[1])
 	if err != nil {
 		return err
 	}
 	defer newFile.Close()
-	_, err = io.Copy(newFile, file)
+	_, err = io.Copy(newFile, rfile)
 	if err != nil {
 		return err
 	}
@@ -37,7 +46,7 @@ func ReceiveFile(w http.ResponseWriter, r *http.Request) error {
 
 func RequestFile(w http.ResponseWriter, r *http.Request) error {
 	s := r.URL.Query().Get("service")
-	files := findFiles(s)
+	files := findFilesByService(s)
 	if len(files) == 0 {
 		return errors.New("NOT SUCCESS : config is not found")
 	}
@@ -58,7 +67,7 @@ func chooseNewestFile(files []string) string {
 	maxV := "0.0"
 	maxVId := -1
 	for i, file := range files {
-		v := getV(file)
+		v := getVersion(file)
 		if greater(v, maxV) {
 			maxV = v
 			maxVId = i
@@ -78,12 +87,20 @@ func greater(v string, maxV string) bool {
 	return false
 }
 
-func getV(file string) string {
+func getVersion(file string) string {
 	s := strings.Split(file, "_v")
 	return s[len(s)-1][:len(s[len(s)-1])-5] //last split element without last 5 symbols (.json)
 }
 
-func findFiles(serviceName string) []string {
+func getNextCreateVersion(v string) string {
+	p := strings.Split(v, ".")
+	pi, _ := strconv.Atoi(p[0])
+	pi++
+	p[0] = strconv.Itoa(pi)
+	return p[0] + "." + p[1]
+}
+
+func findFilesByService(serviceName string) []string {
 	files, err := ioutil.ReadDir("./configs")
 	if err != nil {
 		iLog.Fatal(err)
@@ -101,6 +118,25 @@ func findFiles(serviceName string) []string {
 		f.Close()
 		value := extractValue(string(byteValue[:]), "service")
 		if value[1:] == serviceName || serviceName == "" { //value[1:] because first symbol everytime is SPACE
+			correctFiles = append(correctFiles, file.Name())
+		}
+	}
+	return correctFiles
+}
+
+func findFilesByName(name string) []string {
+	files, err := ioutil.ReadDir("./configs")
+	if err != nil {
+		iLog.Fatal(err)
+	}
+	var correctFiles []string
+	for _, file := range files {
+		tmp := strings.Split(file.Name(), "_v")
+		var fileName string
+		for i := 0; i < len(tmp)-1; i++ { //fileName without _v*.*.json
+			fileName += tmp[i]
+		}
+		if fileName == name {
 			correctFiles = append(correctFiles, file.Name())
 		}
 	}
