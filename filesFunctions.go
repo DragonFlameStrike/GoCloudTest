@@ -30,9 +30,10 @@ func ReceiveFile(w http.ResponseWriter, r *http.Request) error {
 	files := findFilesByName(name[0])
 	nfile := chooseNewestFile(files)
 	v := getVersion(nfile)
+	nv := getNextCreateVersion(v)
 
 	//Create file on server
-	newFile, err := os.Create("./configs/" + name[0] + "_v" + getNextCreateVersion(v) + "." + name[1])
+	newFile, err := os.Create("./configs/" + name[0] + "_v" + nv + "." + name[1])
 	if err != nil {
 		return err
 	}
