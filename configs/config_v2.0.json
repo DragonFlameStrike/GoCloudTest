@@ -1,7 +1,0 @@
-{
-  "service": "kuber",
-  "data": [
-    {"key1": "miu"},
-    {"key2": "mau"}
-  ]
-}
