@@ -78,6 +78,33 @@ func RequestFile(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+func DeleteFile(w http.ResponseWriter, r *http.Request) error {
+	deletedF := r.URL.Query().Get("filename")
+	if deletedF == "" {
+		return errors.New("NOT SUCCESS : request without filename")
+	}
+	tmp := strings.Split(deletedF, "_v")
+	var deletedFileName string
+	for i := 0; i < len(tmp)-1; i++ { //fileName without _v*.*.json
+		deletedFileName += tmp[i]
+	}
+	files := findFilesByName(deletedFileName)
+	if len(files) == 0 {
+		return errors.New("NOT SUCCESS : config(-s) is not found")
+	}
+
+	file := chooseNewestFile(files)
+	if file == deletedF {
+		return errors.New("NOT SUCCESS : can't delete last version file")
+	} else {
+		err := os.Remove("./configs/" + deletedF)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func chooseNewestFile(files []string) string {
 	maxV := "0.0"
 	maxVId := -1

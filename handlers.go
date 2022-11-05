@@ -36,7 +36,16 @@ func configReadCreate(w http.ResponseWriter, r *http.Request) {
 		} else {
 			iLog.Println("SUCCESS : file is received!")
 		}
+	case "DELETE":
+		iLog.Println("catch DELETE request...")
+		err := DeleteFile(w, r)
+		if err != nil {
+			iLog.Print(err)
+			http.Error(w, "400 bad request.", http.StatusBadRequest)
+		} else {
+			iLog.Println("SUCCESS : file is deleted")
+		}
 	default:
-		iLog.Println(w, "Only GET and POST methods are supported.")
+		iLog.Println(w, "Only GET, POST, PUT and DELETE methods are supported.")
 	}
 }
