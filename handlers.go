@@ -21,14 +21,20 @@ func configReadCreate(w http.ResponseWriter, r *http.Request) {
 		} else {
 			iLog.Println("SUCCESS : file(-s) is sent")
 		}
-	case "POST":
-		iLog.Println("catch CREATE request...")
+	case "POST", "PUT":
+		// POST - create file on server
+		// PUT - edit file on server
+		if r.Method == "POST" {
+			iLog.Println("catch CREATE request...")
+		} else {
+			iLog.Println("catch UPDATE request...")
+		}
 		err := ReceiveFile(w, r)
 		if err != nil {
 			iLog.Print(err)
 			http.Error(w, "400 bad request.", http.StatusBadRequest)
 		} else {
-			iLog.Println("SUCCESS : file is created!")
+			iLog.Println("SUCCESS : file is received!")
 		}
 	default:
 		iLog.Println(w, "Only GET and POST methods are supported.")

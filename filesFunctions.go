@@ -28,9 +28,24 @@ func ReceiveFile(w http.ResponseWriter, r *http.Request) error {
 
 	//Choose correct version
 	files := findFilesByName(name[0])
-	nfile := chooseNewestFile(files)
-	v := getVersion(nfile)
-	nv := getNextCreateVersion(v)
+	var v, nv string
+	if len(files) == 0 {
+		if r.Method == "POST" {
+			nv = "1.0"
+		}
+		if r.Method == "PUT" {
+			return errors.New("NOT SUCCESS : Can't edit, file with this name doesn't exist")
+		}
+	} else {
+		nfile := chooseNewestFile(files)
+		v = getVersion(nfile)
+		if r.Method == "POST" {
+			nv = getNextCreateVersion(v)
+		}
+		if r.Method == "PUT" {
+			nv = getNextUpdateVersion(v)
+		}
+	}
 
 	//Create file on server
 	newFile, err := os.Create("./configs/" + name[0] + "_v" + nv + "." + name[1])
@@ -49,7 +64,7 @@ func RequestFile(w http.ResponseWriter, r *http.Request) error {
 	s := r.URL.Query().Get("service")
 	files := findFilesByService(s)
 	if len(files) == 0 {
-		return errors.New("NOT SUCCESS : config is not found")
+		return errors.New("NOT SUCCESS : config(-s) is not found")
 	}
 	if s == "" { //Print all configs
 		for i, file := range files {
@@ -97,6 +112,14 @@ func getNextCreateVersion(v string) string {
 	pi, _ := strconv.Atoi(p[0])
 	pi++
 	p[0] = strconv.Itoa(pi)
+	return p[0] + "." + p[1]
+}
+
+func getNextUpdateVersion(v string) string {
+	p := strings.Split(v, ".")
+	pi, _ := strconv.Atoi(p[1])
+	pi++
+	p[1] = strconv.Itoa(pi)
 	return p[0] + "." + p[1]
 }
 
