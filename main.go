@@ -10,12 +10,17 @@ import (
 )
 
 var (
-	LOGFILE = "/tmp/GoCloudTest.log"
+	LOGFILE = "GoCloudTest.log"
 	iLog    *log.Logger
 )
 
 func main() {
 	//Create logger
+	//f, err := os.Create(LOGFILE)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
 	f, err := os.OpenFile(LOGFILE, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Println(err)
