@@ -43,4 +43,4 @@ You can Delete config
         You can't delete main version of config
 
 
-All warnings and errors are logging in /tmp/GoCloudTest
+All warnings and errors are logging in ./tmp/GoCloudTest
