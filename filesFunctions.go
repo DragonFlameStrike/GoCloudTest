@@ -167,7 +167,7 @@ func findFilesByService(serviceName string) []string {
 		}
 		f.Close()
 		value := extractValue(string(byteValue[:]), "service")
-		if value[1:] == serviceName || serviceName == "" { //value[1:] because first symbol everytime is SPACE
+		if serviceName == "" || (len(value) > 0 && value[1:] == serviceName) { //value[1:] because first symbol everytime is SPACE
 			correctFiles = append(correctFiles, file.Name())
 		}
 	}
@@ -202,5 +202,8 @@ func extractValue(body string, key string) string {
 	r, _ := regexp.Compile(keystr)
 	match := r.FindString(body)
 	keyValMatch := strings.Split(match, ":")
+	if len(keyValMatch) <= 1 {
+		return ""
+	}
 	return strings.ReplaceAll(keyValMatch[1], "\"", "")
 }
